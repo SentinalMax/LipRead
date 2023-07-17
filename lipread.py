@@ -12,12 +12,14 @@ from tqdm import tqdm
 import time 
 
 #python3 -m pip install pytesseract
+#python3 -m pip install imageio
 #python3 -m pip install imageio[ffmpeg]
 #python3 -m pip install spacy
 #python3 -m pip install imageio[pyav]
 #python3 -m pip install opencv-python
 #python3 -m pip install tesseract
 #python3 -m pip install tesseract-ocr
+#python3 -m spacy download en_core_web_sm
 
 #Variables
 threshold1 = 100
@@ -70,16 +72,21 @@ print("\nStep #4 [Apply Edge Detection to detect mouth contours] COMPLETE")
 # Step 5 : Use OCR to read words from lips
 for frame in frame_list:
     
-    d = pytesseract.image_to_data(frame, output_type=Output.DICT)
+    d = pytesseract.image_to_data(frame, lang='eng', output_type=Output.DICT)
     text = d['text'][0]
     speech = ' '.join([w for w in text.split() if w])
     progress_bar.update(1)
+    print(speech + "-t")
 
 print("\nStep #5 [Use OCR to read words from lips] COMPLETE")
 # Step 6 : Use NLP to understand the meaning of the words
 
+
 nlp = spacy.load('en_core_web_sm')
 matcher = Matcher(nlp.vocab)
+pat_1 = [{'LOWER': 'hello'}, {'IS_PUNCT': True}, {'LOWER': 'world'}]
+matcher.add('hello_world', [pat_1])
+
 doc = nlp(speech)
 matches = matcher(doc)
 
